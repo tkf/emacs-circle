@@ -26,7 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'epcs)
 (require 'dash)
 
@@ -35,8 +34,7 @@
 ;;; Served methods
 
 (defun o:epc-manager-init (mngr)
-  (lexical-let ((mngr mngr))
-    (epc:define-method mngr 'set-input-focus 'o:set-input-focus)))
+  (epc:define-method mngr 'set-input-focus 'o:set-input-focus))
 
 (defun o:set-input-focus ()
   (select-frame-set-input-focus (selected-frame)))
@@ -68,10 +66,8 @@
 
 (defun o:server-connect (mngr)
   (o:epc-manager-init mngr)
-  (lexical-let ((mngr mngr))
-    (epc:define-method mngr 'call-on-next
-                       (lambda (&rest args)
-                         (apply #'o:server-call-on-next mngr args))))
+  (epc:define-method mngr 'call-on-next
+                     (apply-partially #'o:server-call-on-next mngr))
   (push mngr o:clients))
 
 (defun o:server-call-on-next (mngr-peer name &optional args)
