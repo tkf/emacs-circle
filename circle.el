@@ -49,6 +49,8 @@
 (defvar o:server-process nil
   "Process object for EPC server.")
 
+(defvar o:clients nil)
+
 (defun o:start-server ()
   (setq o:server-process
         (epcs:server-start #'o:server-connect))
@@ -61,9 +63,8 @@
 (defun o:stop-server ()
   (epcs:server-stop o:server-process)
   (setq o:server-process nil)
-  (delete-file o:server-port-file))
-
-(defvar o:clients nil)
+  (delete-file o:server-port-file)
+  (setq o:clients nil))
 
 (defun o:server-connect (mngr)
   (o:epc-manager-init mngr)
