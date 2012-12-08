@@ -34,7 +34,8 @@
 ;;; Served methods
 
 (defun o:epc-manager-init (mngr)
-  (epc:define-method mngr 'set-input-focus 'o:set-input-focus))
+  (epc:define-method mngr 'set-input-focus 'o:set-input-focus)
+  (epc:define-method mngr 'load 'load))
 
 (defun o:set-input-focus ()
   (select-frame-set-input-focus (selected-frame)))
@@ -131,6 +132,10 @@
 (defun o:focus-next-node ()
   (interactive)
   (o:call-on-next 'set-input-focus))
+
+(defun o:reload-circle-el ()
+  (interactive)
+  (o:call-on-all 'load (list "circle")))
 
 
 ;;; circle-mode
