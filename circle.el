@@ -68,6 +68,7 @@
   (o:epc-manager-init mngr)
   (epc:define-method mngr 'call-on-next
                      (apply-partially #'o:server-call-on-next mngr))
+  (epc:define-method mngr 'call-on-all #'o:call-on-all--server)
   (push mngr o:clients))
 
 (defun o:server-call-on-next (mngr-peer name &optional args)
@@ -76,6 +77,15 @@
         (epc:call-deferred mngr-peer name args)
       ;; FIXME: `epc:manager-get-method' is not a public function
       (apply (epc:manager-get-method mngr-peer name) args))))
+
+(defun o:call-on-all--server (name &optional args)
+  (apply #'deferred:parallel
+         (deferred:next
+           ;; FIXME: `epc:manager-get-method' is not a public function
+           (epc:manager-get-method (car o:clients) name)
+           args)
+         (mapcar (lambda (mngr) (epc:call-deferred mngr name args))
+                 o:clients)))
 
 (defun o:next-node--server ()
   (epc:call-deferred (car o:clients) 'set-input-focus nil))
@@ -94,6 +104,9 @@
   (epc:stop-epc o:client-epc)
   (setq o:client-epc nil))
 
+(defun o:call-on-all--client (name &optional args)
+  (epc:call-deferred o:client-epc 'call-on-all (list name args)))
+
 
 ;;; Compatible layer
 
@@ -109,6 +122,11 @@
 
 (defun o:call-on-next (name &optional args)
   (epc:call-deferred (or o:client-epc (car o:clients)) name args))
+
+(defun o:call-on-all (name &optional args)
+  (if o:client-epc
+      (o:call-on-all--client name args)
+    (o:call-on-all--server name args)))
 
 (defun o:focus-next-node ()
   (interactive)
