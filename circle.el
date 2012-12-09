@@ -88,13 +88,13 @@
   (epc:method-task (epc:manager-get-method mngr name)))
 
 (defun o:server-call-on-next (mngr-peer name &optional args)
-  (let ((next (o:next-in-list o:clients mngr-peer)))
+  (let ((next (o:previous-in-list o:clients mngr-peer)))
     (if next
         (epc:call-deferred next name args)
       (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:server-call-on-previous (mngr-peer name &optional args)
-  (let ((prev (o:previous-in-list o:clients mngr-peer)))
+  (let ((prev (o:next-in-list o:clients mngr-peer)))
     (if prev
         (epc:call-deferred prev name args)
       (apply (o:get-serving-method mngr-peer name) args))))
@@ -147,12 +147,12 @@
 (defun circle-call-on-next (name &optional args)
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-next (list name args))
-    (epc:call-deferred (car o:clients) name args)))
+    (epc:call-deferred (car (last o:clients)) name args)))
 
 (defun circle-call-on-previous (name &optional args)
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-previous (list name args))
-    (epc:call-deferred (car (last o:clients)) name args)))
+    (epc:call-deferred (car o:clients) name args)))
 
 (defun circle-call-on-all (name &optional args)
   (if o:client-epc
