@@ -125,21 +125,24 @@
       (o:stop-client)
     (o:stop-server)))
 
-(defun o:call-on-next (name &optional args)
+
+;;; Public command/API
+
+(defun circle-call-on-next (name &optional args)
   (epc:call-deferred (or o:client-epc (car o:clients)) name args))
 
-(defun o:call-on-all (name &optional args)
+(defun circle-call-on-all (name &optional args)
   (if o:client-epc
       (o:call-on-all--client name args)
     (o:call-on-all--server name args)))
 
-(defun o:focus-next-node ()
+(defun circle-focus-next-node ()
   (interactive)
-  (o:call-on-next 'set-input-focus))
+  (circle-call-on-next 'set-input-focus))
 
-(defun o:reload-circle-el ()
+(defun circle-reload-circle-el ()
   (interactive)
-  (o:call-on-all 'load (list "circle")))
+  (circle-call-on-all 'load (list "circle")))
 
 
 ;;; circle-mode
@@ -153,12 +156,6 @@
   (if circle-mode
       (o:start-circle)
     (o:stop-circle)))
-
-(mapc (lambda (name)
-        (defalias
-          (intern (format "circle-%s" name))
-          (intern (format "o:%s" name))))
-      '("focus-next-node" "reload-circle-el"))
 
 (let ((map circle-mode-map))
   (define-key map (kbd "C-c ' n") 'circle-focus-next-node)
