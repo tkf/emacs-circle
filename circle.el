@@ -86,8 +86,9 @@
 (defun o:call-on-all--server (name &optional args)
   (apply #'deferred:parallel
          (deferred:next
-           (o:get-serving-method (car o:clients) name)
-           args)
+           (apply #'apply-partially
+                  (o:get-serving-method (car o:clients) name)
+                  args))
          (mapcar (lambda (mngr) (epc:call-deferred mngr name args))
                  o:clients)))
 
