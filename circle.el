@@ -73,18 +73,20 @@
   (epc:define-method mngr 'call-on-all #'o:call-on-all--server)
   (push mngr o:clients))
 
+(defun o:get-serving-method (mngr name)
+  ;; FIXME: `epc:manager-get-method' is not a public function
+  (epc:method-task (epc:manager-get-method mngr name)))
+
 (defun o:server-call-on-next (mngr-peer name &optional args)
   (let ((next (cadr (--drop-while (not (eq it mngr-peer)) o:clients))))
     (if next
         (epc:call-deferred mngr-peer name args)
-      ;; FIXME: `epc:manager-get-method' is not a public function
-      (apply (epc:manager-get-method mngr-peer name) args))))
+      (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:call-on-all--server (name &optional args)
   (apply #'deferred:parallel
          (deferred:next
-           ;; FIXME: `epc:manager-get-method' is not a public function
-           (epc:manager-get-method (car o:clients) name)
+           (o:get-serving-method (car o:clients) name)
            args)
          (mapcar (lambda (mngr) (epc:call-deferred mngr name args))
                  o:clients)))
