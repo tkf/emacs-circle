@@ -144,12 +144,25 @@
 
 ;;; circle-mode
 
+(defvar circle-mode-map (make-sparse-keymap))
+
 (define-minor-mode circle-mode
   "Join to a circle."
   :global t
+  :keymap circle-mode-map
   (if circle-mode
       (o:start-circle)
     (o:stop-circle)))
+
+(mapc (lambda (name)
+        (defalias
+          (intern (format "circle-%s" name))
+          (intern (format "o:%s" name))))
+      '("focus-next-node" "reload-circle-el"))
+
+(let ((map circle-mode-map))
+  (define-key map (kbd "C-c ' n") 'circle-focus-next-node)
+  (define-key map (kbd "C-c ' R") 'circle-reload-circle-el))
 
 (provide 'circle)
 
