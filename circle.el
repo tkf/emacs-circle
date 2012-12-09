@@ -29,6 +29,14 @@
 (require 'epcs)
 (require 'dash)
 
+
+;;; Utilities
+
+(defun o:next-in-list (list elem)
+  (cadr (--drop-while (not (eq it elem)) list)))
+
+(defun o:previous-in-list (list elem)
+  (car (last (--take-while (not (eq it elem)) list))))
 
 
 ;;; Served methods
@@ -80,13 +88,13 @@
   (epc:method-task (epc:manager-get-method mngr name)))
 
 (defun o:server-call-on-next (mngr-peer name &optional args)
-  (let ((next (cadr (--drop-while (not (eq it mngr-peer)) o:clients))))
+  (let ((next (o:next-in-list o:clients mngr-peer)))
     (if next
         (epc:call-deferred next name args)
       (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:server-call-on-previous (mngr-peer name &optional args)
-  (let ((prev (car (last (--take-while (not (eq it mngr-peer)) o:clients)))))
+  (let ((prev (o:previous-in-list o:clients mngr-peer)))
     (if prev
         (epc:call-deferred prev name args)
       (apply (o:get-serving-method mngr-peer name) args))))
