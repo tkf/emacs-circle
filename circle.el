@@ -155,6 +155,10 @@
   (interactive)
   (circle-call-on-next 'set-input-focus))
 
+(defun circle-focus-previous-node ()
+  (interactive)
+  (circle-call-on-previous 'set-input-focus))
+
 (defun circle-reload-circle-el ()
   (interactive)
   (circle-call-on-all 'load (list "circle")))
@@ -174,6 +178,7 @@
 
 (let ((map circle-mode-map))
   (define-key map (kbd "C-c ' n") 'circle-focus-next-node)
+  (define-key map (kbd "C-c ' p") 'circle-focus-previous-node)
   (define-key map (kbd "C-c ' R") 'circle-reload-circle-el))
 
 (provide 'circle)
