@@ -70,6 +70,8 @@
   (o:epc-manager-init mngr)
   (epc:define-method mngr 'call-on-next
                      (apply-partially #'o:server-call-on-next mngr))
+  (epc:define-method mngr 'call-on-previous
+                     (apply-partially #'o:server-call-on-previous mngr))
   (epc:define-method mngr 'call-on-all #'o:call-on-all--server)
   (push mngr o:clients))
 
@@ -81,6 +83,12 @@
   (let ((next (cadr (--drop-while (not (eq it mngr-peer)) o:clients))))
     (if next
         (epc:call-deferred next name args)
+      (apply (o:get-serving-method mngr-peer name) args))))
+
+(defun o:server-call-on-previous (mngr-peer name &optional args)
+  (let ((prev (car (last (--take-while (not (eq it mngr-peer)) o:clients)))))
+    (if prev
+        (epc:call-deferred prev name args)
       (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:call-on-all--server (name &optional args)
@@ -132,6 +140,11 @@
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-next (list name args))
     (epc:call-deferred (car o:clients) name args)))
+
+(defun circle-call-on-previous (name &optional args)
+  (if o:client-epc
+      (epc:call-deferred o:client-epc 'call-on-previous (list name args))
+    (epc:call-deferred (car (last o:clients)) name args)))
 
 (defun circle-call-on-all (name &optional args)
   (if o:client-epc
