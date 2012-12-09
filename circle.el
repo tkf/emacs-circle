@@ -80,7 +80,7 @@
 (defun o:server-call-on-next (mngr-peer name &optional args)
   (let ((next (cadr (--drop-while (not (eq it mngr-peer)) o:clients))))
     (if next
-        (epc:call-deferred mngr-peer name args)
+        (epc:call-deferred next name args)
       (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:call-on-all--server (name &optional args)
