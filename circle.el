@@ -129,7 +129,9 @@
 ;;; Public command/API
 
 (defun circle-call-on-next (name &optional args)
-  (epc:call-deferred (or o:client-epc (car o:clients)) name args))
+  (if o:client-epc
+      (epc:call-deferred o:client-epc 'call-on-next (list name args))
+    (epc:call-deferred (car o:clients) name args)))
 
 (defun circle-call-on-all (name &optional args)
   (if o:client-epc
