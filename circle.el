@@ -39,8 +39,10 @@
   (car (last (--take-while (not (eq it elem)) list))))
 
 (defun o:epc-live-p (mngr)
-  (process-live-p
-   (epc:connection-process (epc:manager-connection mngr))))
+  (and
+   (epc:manager-p mngr)
+   (process-live-p
+    (epc:connection-process (epc:manager-connection mngr)))))
 
 
 ;;; Served methods
