@@ -70,13 +70,14 @@
   (setq o:clients (-select #'o:epc-live-p o:clients)))
 
 (defun o:start-server ()
-  (setq o:server-process
-        (epcs:server-start #'o:server-connect))
-  (with-temp-buffer
-    (erase-buffer)
-    (insert (format "%d" (process-contact o:server-process :service)))
-    (write-region (point-min) (point-max)
-                  (expand-file-name o:server-port-file))))
+  (unless (and (processp o:server-process) (process-live-p o:server-process))
+    (setq o:server-process
+          (epcs:server-start #'o:server-connect))
+    (with-temp-buffer
+      (erase-buffer)
+      (insert (format "%d" (process-contact o:server-process :service)))
+      (write-region (point-min) (point-max)
+                    (expand-file-name o:server-port-file)))))
 
 (defun o:stop-server ()
   (epcs:server-stop o:server-process)
