@@ -38,6 +38,10 @@
 (defun o:previous-in-list (list elem)
   (car (last (--take-while (not (eq it elem)) list))))
 
+(defun o:epc-live-p (mngr)
+  (process-live-p
+   (epc:connection-process (epc:manager-connection mngr))))
+
 
 ;;; Served methods
 
@@ -58,6 +62,12 @@
   "Process object for EPC server.")
 
 (defvar o:clients nil)
+
+(defun o:gc-clients ()
+  "Throw away dead clients and rest `o:clients'."
+  ;; If EPCS allows user to set "sentinel" for each connection there
+  ;; will be no need for this function.
+  (setq o:clients (-select #'o:epc-live-p o:clients)))
 
 (defun o:start-server ()
   (setq o:server-process
@@ -88,18 +98,21 @@
   (epc:method-task (epc:manager-get-method mngr name)))
 
 (defun o:server-call-on-next (mngr-peer name &optional args)
+  (o:gc-clients)
   (let ((next (o:previous-in-list o:clients mngr-peer)))
     (if next
         (epc:call-deferred next name args)
       (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:server-call-on-previous (mngr-peer name &optional args)
+  (o:gc-clients)
   (let ((prev (o:next-in-list o:clients mngr-peer)))
     (if prev
         (epc:call-deferred prev name args)
       (apply (o:get-serving-method mngr-peer name) args))))
 
 (defun o:call-on-all--server (name &optional args)
+  (o:gc-clients)
   (apply #'deferred:parallel
          (deferred:next
            (apply #'apply-partially
@@ -109,6 +122,7 @@
                  o:clients)))
 
 (defun o:next-node--server ()
+  (o:gc-clients)
   (epc:call-deferred (car o:clients) 'set-input-focus nil))
 
 
@@ -145,11 +159,13 @@
 ;;; Public command/API
 
 (defun circle-call-on-next (name &optional args)
+  (o:gc-clients)
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-next (list name args))
     (epc:call-deferred (car (last o:clients)) name args)))
 
 (defun circle-call-on-previous (name &optional args)
+  (o:gc-clients)
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-previous (list name args))
     (epc:call-deferred (car o:clients) name args)))
