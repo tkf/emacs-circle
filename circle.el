@@ -131,9 +131,10 @@
 (defvar o:client-epc nil)
 
 (defun o:start-client ()
-  (setq o:client-epc
-        (epc:start-epc "cat" (list o:server-port-file)))
-  (o:epc-manager-init o:client-epc))
+  (unless (o:epc-live-p o:client-epc)
+    (setq o:client-epc
+          (epc:start-epc "cat" (list o:server-port-file)))
+    (o:epc-manager-init o:client-epc)))
 
 (defun o:stop-client ()
   (epc:stop-epc o:client-epc)
