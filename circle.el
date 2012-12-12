@@ -48,6 +48,8 @@
 ;;; Served methods
 
 (defun o:epc-manager-init (mngr)
+  (set-process-query-on-exit-flag
+   (epc:connection-process (epc:manager-connection mngr)) nil)
   (epc:define-method mngr 'set-input-focus 'o:set-input-focus)
   (epc:define-method mngr 'load 'load))
 
