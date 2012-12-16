@@ -203,6 +203,7 @@
 
 (defvar circle-mode-map (make-sparse-keymap))
 
+;;;###autoload
 (define-minor-mode circle-mode
   "Join to a circle."
   :global t
