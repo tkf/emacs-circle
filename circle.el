@@ -89,6 +89,9 @@
   (delete-file o:server-port-file)
   (setq o:clients nil))
 
+(defun o:tear-down-server ()
+  (when o:server-process (ignore-errors (o:stop-server))))
+
 (defun o:server-connect (mngr)
   (o:epc-manager-init mngr)
   (epc:define-method mngr 'call-on-next
@@ -154,12 +157,14 @@
 (defun o:start-circle ()
   (if (file-exists-p o:server-port-file)
       (o:start-client)
-    (o:start-server)))
+    (o:start-server)
+    (add-hook 'kill-emacs-hook 'o:tear-down-server)))
 
 (defun o:stop-circle ()
   (if o:client-epc
       (o:stop-client)
-    (o:stop-server)))
+    (o:stop-server)
+    (remove-hook 'kill-emacs-hook 'o:tear-down-server)))
 
 
 ;;; Public command/API
