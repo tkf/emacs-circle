@@ -60,9 +60,14 @@ Frame to be selected is passed as the first argument."
 ;;; Served methods
 
 (defun o:epc-manager-init (mngr)
+  "Setup EPC manager.  This function is called on both server
+and client."
   (set-process-query-on-exit-flag
    (epc:connection-process (epc:manager-connection mngr)) nil)
   (epc:define-method mngr 'set-input-focus 'o:set-input-focus)
+  (epc:define-method mngr 'funcall 'funcall)
+  (epc:define-method mngr 'apply 'apply)
+  (epc:define-method mngr 'eval 'eval)
   (epc:define-method mngr 'load 'load))
 
 (defun o:set-input-focus ()
