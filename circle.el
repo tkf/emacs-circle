@@ -170,18 +170,21 @@
 ;;; Public command/API
 
 (defun circle-call-on-next (name &optional args)
+  "Call remote method called NAME with ARGS on the next node."
   (o:gc-clients)
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-next (list name args))
     (epc:call-deferred (car (last o:clients)) name args)))
 
 (defun circle-call-on-previous (name &optional args)
+  "Call remote method called NAME with ARGS on the previous node."
   (o:gc-clients)
   (if o:client-epc
       (epc:call-deferred o:client-epc 'call-on-previous (list name args))
     (epc:call-deferred (car o:clients) name args)))
 
 (defun circle-call-on-all (name &optional args)
+  "Call remote method called NAME with ARGS on all node."
   (if o:client-epc
       (o:call-on-all--client name args)
     (o:call-on-all--server name args)))
