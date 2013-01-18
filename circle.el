@@ -30,6 +30,18 @@
 (require 'dash)
 
 
+;;; Configuration
+
+(defgroup circle nil
+  "Tool for manipulating network of Emacs."
+  :group 'communication)
+
+(defcustom circle-set-input-focus-function 'select-frame-set-input-focus
+  "A function to be called for raising the frame.
+Frame to be selected is passed as the first argument."
+  :group 'circle)
+
+
 ;;; Utilities
 
 (defun o:next-in-list (list elem)
@@ -54,7 +66,7 @@
   (epc:define-method mngr 'load 'load))
 
 (defun o:set-input-focus ()
-  (select-frame-set-input-focus (selected-frame)))
+  (funcall circle-set-input-focus-function (selected-frame)))
 
 
 ;;; Server
